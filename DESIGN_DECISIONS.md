@@ -215,3 +215,17 @@ Future option: Evaluate approved cloud OCR services in a production environment.
 
 \- Finding: Structured net-contents validation correctly identified a quantity/unit discrepancy.
 
+
+
+\### Test 006 - Incorrect Government Warning
+
+\- Input: Label contained intentionally incorrect government warning language.
+
+\- Expected result: Government Warning = Mismatch
+
+\- Actual result: \[enter actual result]
+
+\- Processing time: \[enter time]
+
+\- Finding: The validator distinguished the presence of a warning heading from compliance with the required warning text.
+
