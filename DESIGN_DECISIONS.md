@@ -229,3 +229,27 @@ Future option: Evaluate approved cloud OCR services in a production environment.
 
 \- Finding: The validator distinguished the presence of a warning heading from compliance with the required warning text.
 
+
+
+\### Test 006 - Incorrect Government Warning
+
+\- Input: Label contained intentionally incorrect government warning language while maintaining 45% alcohol content and 750 mL net contents.
+
+\- Processing time: 3.10 seconds
+
+\- Brand: Mismatch
+
+\- Class/type: Mismatch
+
+\- ABV: Match
+
+\- Net contents: Match
+
+\- Government Warning: Mismatch
+
+\- Expected warning result: Mismatch
+
+\- Actual warning result: Mismatch
+
+\- Finding: The validator correctly distinguished a government warning heading from the required warning text. OCR quality on this more complex label was significantly lower, which also produced false mismatches for brand and class/type. This reinforces the need for human review when OCR extraction quality is poor.
+
