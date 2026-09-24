@@ -29,7 +29,7 @@ def validate_flexible(field, expected, extracted):
         return result(field, "NEEDS REVIEW", f'Label text appears similar to "{expected}" but is not an exact normalized match.')
     return result(field, "MISMATCH", f'Expected value "{expected}" was not confidently detected.')
 
-def validate_brand(expected, extracted):
+def def validate_brand(expected, extracted):
     if not expected.strip():
         return result(
             "Brand Name",
@@ -40,8 +40,6 @@ def validate_brand(expected, extracted):
     expected_n = normalize_text(expected)
     extracted_n = normalize_text(extracted)
 
-    # Only give a full MATCH when the complete normalized brand
-    # appears together in the OCR output.
     if expected_n in extracted_n:
         return result(
             "Brand Name",
@@ -56,49 +54,62 @@ def validate_brand(expected, extracted):
     possible = []
 
     for expected_token in expected_tokens:
-        # Exact recognition
         if expected_token in extracted_tokens:
             confirmed.append(expected_token)
             continue
 
-        # Fuzzy evidence is allowed to trigger review, never a Match.
         if len(expected_token) > 3:
-            best_score = max(
-                (fuzz.ratio(expected_token, token)
-                 for token in extracted_tokens),
-                default=0
-            )
+            best_score = 0
+
+            for extracted_token in extracted_tokens:
+                score = fuzz.ratio(expected_token, extracted_token)
+
+                if score > best_score:
+                    best_score = score
 
             if best_score >= 85:
                 possible.append(expected_token)
 
     evidence_count = len(set(confirmed + possible))
-    coverage = evidence_count / len(expected_tokens) if expected_tokens else 0
+
+    if len(expected_tokens) > 0:
+        coverage = evidence_count / len(expected_tokens)
+    else:
+        coverage = 0
 
     if coverage >= 0.60:
-        unverified = [
-            token for token in expected_tokens
-            if token not in confirmed and token not in possible
-        ]
+        unverified = []
 
-        detail = (
-            f' Unverified word(s): {", ".join(unverified).upper()}.'
-            if unverified else
-            " The individual words were detected separately, but the complete brand could not be verified as a phrase."
-        )
+        for token in expected_tokens:
+            if token not in confirmed and token not in possible:
+                unverified.append(token)
+
+        if unverified:
+            missing_text = ", ".join(unverified).upper()
+
+            reason = (
+                f'OCR found partial evidence for expected brand "{expected}", '
+                f'but could not confidently verify the complete brand. '
+                f'Unverified word(s): {missing_text}. Human review is required.'
+            )
+        else:
+            reason = (
+                f'OCR detected the individual words in expected brand "{expected}", '
+                f'but could not verify the complete brand as a phrase. '
+                f'Human review is required.'
+            )
 
         return result(
             "Brand Name",
             "NEEDS REVIEW",
-            f'OCR found partial evidence for expected brand "{expected}", '
-            f'but could not confidently verify the complete brand.{detail} '
-            f'Human review is required.'
+            reason
         )
 
     return result(
         "Brand Name",
         "MISMATCH",
         f'Expected brand "{expected}" was not confidently detected.'
+    )
     )
     )def validate_class_type(expected, extracted):
     return validate_flexible("Class / Type", expected, extracted)
