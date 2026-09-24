@@ -48,21 +48,28 @@ def validate_brand(expected, extracted):
             f'Expected brand "{expected}" was detected on the label.'
         )
 
-    # Compare individual words because decorative label typography
-    # may cause OCR to recognize only part of a brand name.
     expected_tokens = re.findall(r"[a-z0-9]+", expected_n)
     extracted_tokens = re.findall(r"[a-z0-9]+", extracted_n)
 
     matched_tokens = []
 
     for expected_token in expected_tokens:
+
+        # Short words are especially vulnerable to false fuzzy matches.
+        # Require an exact OCR token match for words of 3 characters or fewer.
+        if len(expected_token) <= 3:
+            if expected_token in extracted_tokens:
+                matched_tokens.append(expected_token)
+            continue
+
+        # Longer words may tolerate minor OCR errors.
         best_score = 0
 
         for extracted_token in extracted_tokens:
             score = fuzz.ratio(expected_token, extracted_token)
             best_score = max(best_score, score)
 
-        if best_score >= 80:
+        if best_score >= 85:
             matched_tokens.append(expected_token)
 
     coverage = (
@@ -78,18 +85,24 @@ def validate_brand(expected, extracted):
         )
 
     if coverage >= 0.60:
+        missing_tokens = [
+            token for token in expected_tokens
+            if token not in matched_tokens
+        ]
+
         return result(
             "Brand Name",
             "NEEDS REVIEW",
-            f'Part of expected brand "{expected}" was detected, but OCR could not confidently verify the full brand name. Human review is recommended.'
+            f'Part of expected brand "{expected}" was detected, but OCR '
+            f'could not confidently verify: {", ".join(missing_tokens).upper()}. '
+            f'Human review is recommended.'
         )
 
     return result(
         "Brand Name",
         "MISMATCH",
         f'Expected brand "{expected}" was not confidently detected.'
-    )
-def validate_class_type(expected, extracted):
+    )def validate_class_type(expected, extracted):
     return validate_flexible("Class / Type", expected, extracted)
 
 def _first_number(value):
