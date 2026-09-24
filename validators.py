@@ -40,68 +40,66 @@ def validate_brand(expected, extracted):
     expected_n = normalize_text(expected)
     extracted_n = normalize_text(extracted)
 
-    # Exact normalized match
+    # Only give a full MATCH when the complete normalized brand
+    # appears together in the OCR output.
     if expected_n in extracted_n:
         return result(
             "Brand Name",
             "MATCH",
-            f'Expected brand "{expected}" was detected on the label.'
+            f'Expected brand "{expected}" was detected as a complete phrase.'
         )
 
     expected_tokens = re.findall(r"[a-z0-9]+", expected_n)
     extracted_tokens = re.findall(r"[a-z0-9]+", extracted_n)
 
-    matched_tokens = []
+    confirmed = []
+    possible = []
 
     for expected_token in expected_tokens:
-
-        # Short words are especially vulnerable to false fuzzy matches.
-        # Require an exact OCR token match for words of 3 characters or fewer.
-        if len(expected_token) <= 3:
-            if expected_token in extracted_tokens:
-                matched_tokens.append(expected_token)
+        # Exact recognition
+        if expected_token in extracted_tokens:
+            confirmed.append(expected_token)
             continue
 
-        # Longer words may tolerate minor OCR errors.
-        best_score = 0
+        # Fuzzy evidence is allowed to trigger review, never a Match.
+        if len(expected_token) > 3:
+            best_score = max(
+                (fuzz.ratio(expected_token, token)
+                 for token in extracted_tokens),
+                default=0
+            )
 
-        for extracted_token in extracted_tokens:
-            score = fuzz.ratio(expected_token, extracted_token)
-            best_score = max(best_score, score)
+            if best_score >= 85:
+                possible.append(expected_token)
 
-        if best_score >= 85:
-            matched_tokens.append(expected_token)
-
-    coverage = (
-        len(matched_tokens) / len(expected_tokens)
-        if expected_tokens else 0
-    )
-
-    if coverage == 1:
-        return result(
-            "Brand Name",
-            "MATCH",
-            f'All words in expected brand "{expected}" were detected.'
-        )
+    evidence_count = len(set(confirmed + possible))
+    coverage = evidence_count / len(expected_tokens) if expected_tokens else 0
 
     if coverage >= 0.60:
-        missing_tokens = [
+        unverified = [
             token for token in expected_tokens
-            if token not in matched_tokens
+            if token not in confirmed and token not in possible
         ]
+
+        detail = (
+            f' Unverified word(s): {", ".join(unverified).upper()}.'
+            if unverified else
+            " The individual words were detected separately, but the complete brand could not be verified as a phrase."
+        )
 
         return result(
             "Brand Name",
             "NEEDS REVIEW",
-            f'Part of expected brand "{expected}" was detected, but OCR '
-            f'could not confidently verify: {", ".join(missing_tokens).upper()}. '
-            f'Human review is recommended.'
+            f'OCR found partial evidence for expected brand "{expected}", '
+            f'but could not confidently verify the complete brand.{detail} '
+            f'Human review is required.'
         )
 
     return result(
         "Brand Name",
         "MISMATCH",
         f'Expected brand "{expected}" was not confidently detected.'
+    )
     )def validate_class_type(expected, extracted):
     return validate_flexible("Class / Type", expected, extracted)
 
