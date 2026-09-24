@@ -273,3 +273,47 @@ Future option: Evaluate approved cloud OCR services in a production environment.
 
 \- Finding: OCR quality degraded significantly on decorative typography and a more complex label layout. The test could not reliably evaluate brand-format normalization because the source text was not extracted accurately. This reinforces the need for image-quality controls and human review when OCR evidence is unreliable.
 
+
+
+\### Test 007 - Complex Label OCR Stress Test
+
+\- Input: Stylized Stone's Throw label using decorative typography and a multi-column layout.
+
+\- Processing time: 2.75 seconds
+
+\- Brand: Mismatch
+
+\- Class/type: Mismatch
+
+\- ABV: Match
+
+\- Net contents: Match
+
+\- Government Warning: Mismatch
+
+\- Finding: OCR quality degraded significantly on decorative typography and a more complex label layout. The test could not reliably evaluate brand-format normalization because the source text was not extracted accurately. This reinforced the need for image-quality controls and human review when OCR evidence is unreliable.
+
+
+
+\### Test 008 - Controlled Brand Formatting Variation
+
+\- Input: Application brand entered as "STONE'S THROW DISTILLERY"; label displays "Stone's Throw Distillery."
+
+\- Processing time: 1.85 seconds
+
+\- Brand: Match
+
+\- Class/type: Match
+
+\- ABV: Match
+
+\- Net contents: Match
+
+\- Government Warning: Match
+
+\- Expected brand result: Match
+
+\- Actual brand result: Match
+
+\- Finding: Brand normalization correctly handled capitalization differences while preserving the same brand wording when OCR quality was sufficient.
+
