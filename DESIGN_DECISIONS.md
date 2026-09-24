@@ -253,3 +253,23 @@ Future option: Evaluate approved cloud OCR services in a production environment.
 
 \- Finding: The validator correctly distinguished a government warning heading from the required warning text. OCR quality on this more complex label was significantly lower, which also produced false mismatches for brand and class/type. This reinforces the need for human review when OCR extraction quality is poor.
 
+
+
+\### Test 007 - Complex Label OCR Stress Test
+
+\- Input: Stylized label using decorative typography and a multi-column layout.
+
+\- Processing time: 2.75 seconds
+
+\- Brand: Mismatch
+
+\- Class/type: Mismatch
+
+\- ABV: Match
+
+\- Net contents: Match
+
+\- Government Warning: Mismatch
+
+\- Finding: OCR quality degraded significantly on decorative typography and a more complex label layout. The test could not reliably evaluate brand-format normalization because the source text was not extracted accurately. This reinforces the need for image-quality controls and human review when OCR evidence is unreliable.
+
