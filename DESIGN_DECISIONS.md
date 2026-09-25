@@ -317,3 +317,25 @@ Future option: Evaluate approved cloud OCR services in a production environment.
 
 \- Finding: Brand normalization correctly handled capitalization differences while preserving the same brand wording when OCR quality was sufficient.
 
+
+
+\### Test 009 - Public Deployment Validation
+
+\- Environment: Streamlit Community Cloud
+
+\- Python version: 3.12
+
+\- Processing time: 2.51 seconds
+
+\- Brand: Match
+
+\- Class/type: Match
+
+\- ABV: Match
+
+\- Net contents: Match
+
+\- Government Warning: Match
+
+\- Finding: The deployed application reproduced expected local behavior in the hosted environment and completed validation within the stakeholder's approximately 5-second performance target.
+
